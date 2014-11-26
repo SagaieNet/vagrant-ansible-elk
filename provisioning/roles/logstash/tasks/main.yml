@@ -1,0 +1,21 @@
+- name: Enable Logstash repository
+  apt_repository: repo="deb http://packages.elasticsearch.org/logstash/{{ logstash_version }}/debian stable main" state=present
+
+- name: Add Logstash repo  key
+  apt_key: url="http://packages.elasticsearch.org/GPG-KEY-elasticsearch" state=present
+
+- name: Install Logstash from repository
+  apt: pkg={{ item }} update_cache=yes state=present
+  with_items:
+   - logstash
+   - logstash-contrib
+
+- name: Logstash input
+  template: src=logstash-input.conf.j2 dest="/etc/logstash/conf.d/logstash_input.conf"
+  notify:
+   - restart logstash
+
+- name: Logstash output
+  template: src=logstash-output.conf.j2 dest="/etc/logstash/conf.d/logstash_output.conf"
+  notify:
+   - restart logstash
